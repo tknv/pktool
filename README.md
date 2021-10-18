@@ -23,13 +23,13 @@ The packet is generated and sent by two ways:
 
   MAC source is 12:34:56:78:9a:bc (fixed default)
 
-  ![image-20211014185229090](.\doc\quick1.jpg)
+  ![image-20211014185229090](./doc/quick1.jpg)
 
 - Run `pktool.exe` `<network interface index>` `<Hex stream txt file>` then it goes to a network.
 
   At figure set interface index is 9 thus uses Realtek USB GbE... for sending the packet
   
-  ![image-20211014185422665](.\doc\quick2.png)
+  ![image-20211014185422665](./doc/quick2.png)
 
 ## network interface index
 
@@ -64,7 +64,7 @@ Here is about 802.1Q - VLAN: https://en.wikipedia.org/wiki/EtherType worth readi
 - Run Wireshark and start a packet capture or open desired .pcap file.
 - Right click a packet which you want to send again or customize then Copy as Hex Stream
 
-![image-20211014234017559](.\doc\arp.jpg)
+![image-20211014234017559](./doc/arp.jpg)
 
 and paste it to notepad etc. It would be:
 
@@ -78,11 +78,11 @@ Let's open the packet by double click it(E.g. the no.49 packet on the above figu
 
 Then click the `Source: Dell_f3:ff:8e...` . Now can see which HEX data are for the source MAC Address at lower HEX dump panel and it highlighted `98 e7 43 f3 ff 8e`
 
-![image-20211014234519930](.\doc\arp-source.jpg)
+![image-20211014234519930](./doc/arp-source.jpg)
 
 Let's modify the source MAC Address to ca:fe:00:00:00:00
 
-![image-20211015002551311](.\doc\modify-arp.jpg)
+![image-20211015002551311](./doc/modify-arp.jpg)
 
 ctrl+h then Find what: `98e743f3ff8e`, Replace with: `cafe00000000` and Replace MAC destination. (tick Wrap around) . 
 
@@ -94,11 +94,11 @@ ffffffffffffcafe0000000008060001080006040001cafe000000000a0a64630000000000000a0a
 
 Let's send it.
 
-![image-20211015003254526](.\doc\send-arp.jpg)
+![image-20211015003254526](./doc/send-arp.jpg)
 
 Observed it on Realtek USB GbE(index 9) with Wireshark. At Wireshark the interface name is Ethernet2(depend on PC). You can find it by ipconfig etc.
 
-![image-20211015003553945](.\doc\cafe-arp.png)
+![image-20211015003553945](./doc/cafe-arp.png)
 
 Before modify MAC source is Dell machine, but now ca:fe:00...  
 
