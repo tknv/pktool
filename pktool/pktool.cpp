@@ -101,6 +101,14 @@ static void init_npcap_dll_path()
     }
 }
 
+const char* timeNow() {
+    SYSTEMTIME st, lt;
+    GetSystemTime(&st);
+    char currentTime[84] = "";
+    sprintf(currentTime, "%d-%d-%d %d:%d:%d:%d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
+    return currentTime;
+}
+
 int main(int argc, char* argv[])
 {
     /* use npcap if possible */
@@ -198,7 +206,7 @@ int main(int argc, char* argv[])
                 m++;
                 //printf("i:%d\n", i);
             }
-            printf("\ninject packet: %s\n", pcap_sendpacket(adhandle, packet, buffer.str().length()/2) == 0 ? "success" : "failed");
+            printf("\ninject packet: %s at %s\n", pcap_sendpacket(adhandle, packet, buffer.str().length()/2) == 0 ? "success" : "failed", timeNow());
             return 0;
         }
     }
@@ -326,6 +334,6 @@ int main(int argc, char* argv[])
         packet[j] = 1;
     }
 
-    printf("\ninject packet: %s\n", pcap_sendpacket(adhandle, packet, isize) == 0 ? "success" : "failed");
+    printf("\ninject packet: %s at %s\n", pcap_sendpacket(adhandle, packet, isize) == 0 ? "success" : "failed", timeNow());
     return 0;
 }
