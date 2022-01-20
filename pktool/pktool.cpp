@@ -12,6 +12,8 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
+#include <chrono>
+#include <thread>
 
 #define MAC_ALEN 6  // mac address: xx:xx:xx:xx:xx:xx;;
 #define PROTO_ALEN 1  // protocol: xxxx;
@@ -103,7 +105,8 @@ static void init_npcap_dll_path()
 
 const char* timeNow() {
     SYSTEMTIME st, lt;
-    GetSystemTime(&st);
+    // GetSystemTime(&st);
+    GetLocalTime(&st);
     char currentTime[84] = "";
     sprintf(currentTime, "%d-%d-%d %d:%d:%d:%d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
     return currentTime;
@@ -119,6 +122,7 @@ int main(int argc, char* argv[])
     int inum;  // interface index
     int i = 0;
     int j = 14;
+    int k = 0;
     int isize;   // a packet data size
     unsigned int mac_part[MAC_ALEN];  // mac address
     int mlen = -1;
@@ -127,6 +131,9 @@ int main(int argc, char* argv[])
     unsigned char packet[PACKET_DATA];  // packet MAX size
     pcap_t* adhandle;
     char errbuf[PCAP_ERRBUF_SIZE];
+    int pkts = 1;  // how many packets will
+    int pps = 50;  // packets per second
+    int wait = 1;  // between pkt
     
     /* Retrieve the device list on the local machine */
     if (pcap_findalldevs_ex((char*)PCAP_SRC_IF_STRING, NULL, &alldevs, errbuf) == -1)
@@ -135,8 +142,8 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    /* for CLI one shot, one packet */
-    if (argc != 2)
+    /* shot from CLI */
+    if (argc != 3)
     {
         int ifid = NULL;
         /* set interface index */
@@ -145,10 +152,31 @@ int main(int argc, char* argv[])
             ifid =atoi( argv[1] );
             //std::cout << argv[1] << std::endl;
         }
-        /* send a packet */
+        /* set times */
         if (ifid != NULL && argv[2])
         {
-            const char *fn = argv[2]; //filename
+            pkts = atoi( argv[2] );
+            if (pkts == 0)  // any invalid 0 then send one pkt.
+            {
+                pkts = 1;
+            }
+            printf("\nsend pkts: %d", pkts);
+        }
+        /* set pps */
+        if (ifid != NULL && argv[3])
+        {
+            pps = atoi(argv[3]);
+            if (pps == 0)  // any invalid 0 then send pkt per second.
+            {
+                pps = 1;
+            }
+            wait = 1000 / pps;
+            printf("\npps: %d, wait(msec): %d\n", pps, wait);
+        }
+        /* send a packet */
+        if (ifid != NULL && argv[4])
+        {
+            const char *fn = argv[4]; //filename
             std::ifstream infile(fn, std::fstream::in);
             std::stringstream buffer;
             buffer << infile.rdbuf();
@@ -194,19 +222,24 @@ int main(int argc, char* argv[])
                         //printf("n:%d\n", n);
                 }
             }
-            unsigned int m = 0;
-            for (int i = 0; i < (blen-1); i+=2)
+            // unsigned int m = 0;
+            for (int k = 0; k < pkts; k += 1)
             {
-                std::string s = std::string{ buf[i] } + std::string{ buf[i + 1] };
-                char a[2] = { buf[i], buf[i+1] };
-                //printf("p string:%s\n", s.c_str());
-                sscanf(a, "%X", &x);
-                packet[m] = x;
-                //printf("packet 0x%x\n", packet[m]);
-                m++;
-                //printf("i:%d\n", i);
+                unsigned int m = 0;
+                for (int i = 0; i < (blen - 1); i += 2)
+                {
+                    std::string s = std::string{ buf[i] } + std::string{ buf[i + 1] };
+                    char a[2] = { buf[i], buf[i + 1] };
+                    //printf("p string:%s\n", s.c_str());
+                    sscanf(a, "%X", &x);
+                    packet[m] = x;
+                    //printf("packet 0x%x\n", packet[m]);
+                    m++;
+                    //printf("i:%d\n", i);
+                }
+                printf("\nid:%d inject packet: %s at %s\n", k, pcap_sendpacket(adhandle, packet, buffer.str().length() / 2) == 0 ? "success" : "failed", timeNow());
+                std::this_thread::sleep_for(std::chrono::milliseconds(wait));
             }
-            printf("\ninject packet: %s at %s\n", pcap_sendpacket(adhandle, packet, buffer.str().length()/2) == 0 ? "success" : "failed", timeNow());
             return 0;
         }
     }

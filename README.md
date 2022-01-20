@@ -4,7 +4,10 @@
 
 > No matter broadcast, multicast, pseudo protocol, jumbo frame even not own source MAC Address. pktool sends it (best effort).
 
-pktool can configure Layer 2 Ethernet frame.
+pktool can configure Layer 2 Ethernet frame, pps(packets per second), packet amount and an interface of transmit.  
+When I test at Windows 10, onboard eth(Intel(R) Ethernet Connection (7) I219-LM) and USB eth(Realtek USB GbE Family Controller) both MAX PPS is around 63. Yet don't know the reason.
+
+
 
 ## Dependencies
 
@@ -25,9 +28,15 @@ The packet is generated and sent by two ways:
 
   ![image-20211014185229090](./doc/quick1.jpg)
 
-- Run `pktool.exe` `<network interface index>` `<Hex stream txt file>` then it goes to a network.
+- Run:
+  ```
+  pktool.exe <network interface index> <pkt amount> <pps> <Hex stream txt file>
+  > pktool.exe 6 1000 50 ./mint-hello.txt
+  ```
 
-  At figure set interface index is 9 thus uses Realtek USB GbE... for sending the packet
+  then it goes to a network.
+
+  At figure set interface index is 11, send 1000 packets and PPS 100(packets per second).
   
   ![image-20211014185422665](./doc/quick2.png)
 
@@ -107,6 +116,3 @@ Before modify MAC source is Dell machine, but now ca:fe:00...
 pcap catalog: https://packetlife.net/captures/
 
 Download it, open it with Wireshark, modify it then send it by `pktool.exe`
-
-
-
