@@ -40,6 +40,13 @@ The packet is generated and sent by two ways:
   
   ![image-20211014185422665](./doc/quick2.png)
 
+  **To use pktool in loop.**  
+  At Windows Command Prompt.  
+  ```cmd
+  FOR /L %N IN () DO .\pktool.exe 4 10 100 .\mint-hello.txt
+  ```  
+  This is infinity loop
+
 ## network interface index
 
 This is an index of network interface. Sometime it changes by doing reboot/delete interface/etc.
